@@ -1,0 +1,402 @@
+[
+  [
+    {
+      "name": "Cycle Count",
+      "value": 0
+    },
+    {
+      "name": "Moved Bikes",
+      "value": 655
+    },
+    {
+      "name": "Cumulative Moved Bikes",
+      "value": 655
+    },
+    {
+      "name": "Rebalanced Bikes",
+      "value": 280
+    },
+    {
+      "name": "Cumulative Rebalanced Bikes",
+      "value": 280
+    },
+    {
+      "name": "Rebalanced Cost",
+      "value": 280
+    },
+    {
+      "name": "Cumulative Rebalance Cost",
+      "value": 280
+    },
+    {
+      "name": "Time Average Rebalance Cost",
+      "value": 0
+    },
+    {
+      "name": "Lyapunov",
+      "value": 418.5
+    },
+    {
+      "name": "Lyapunov Drift",
+      "value": 0
+    },
+    {
+      "name": "Cumulative Lyapunov",
+      "value": 0
+    },
+    {
+      "name": "Time Average Conditional Drift",
+      "value": 0
+    }
+  ],
+  [
+    {
+      "name": "Cycle Count",
+      "value": 1
+    },
+    {
+      "name": "Moved Bikes",
+      "value": 238
+    },
+    {
+      "name": "Cumulative Moved Bikes",
+      "value": 893
+    },
+    {
+      "name": "Rebalanced Bikes",
+      "value": 1438
+    },
+    {
+      "name": "Cumulative Rebalanced Bikes",
+      "value": 1718
+    },
+    {
+      "name": "Rebalanced Cost",
+      "value": 1438
+    },
+    {
+      "name": "Cumulative Rebalance Cost",
+      "value": 1718
+    },
+    {
+      "name": "Time Average Rebalance Cost",
+      "value": 280.0
+    },
+    {
+      "name": "Lyapunov",
+      "value": 147.5
+    },
+    {
+      "name": "Lyapunov Drift",
+      "value": -271.0
+    },
+    {
+      "name": "Cumulative Lyapunov",
+      "value": -271.0
+    },
+    {
+      "name": "Time Average Conditional Drift",
+      "value": -271.0
+    }
+  ],
+  [
+    {
+      "name": "Cycle Count",
+      "value": 2
+    },
+    {
+      "name": "Moved Bikes",
+      "value": 5900
+    },
+    {
+      "name": "Cumulative Moved Bikes",
+      "value": 6793
+    },
+    {
+      "name": "Rebalanced Bikes",
+      "value": 2000
+    },
+    {
+      "name": "Cumulative Rebalanced Bikes",
+      "value": 3718
+    },
+    {
+      "name": "Rebalanced Cost",
+      "value": 2000
+    },
+    {
+      "name": "Cumulative Rebalance Cost",
+      "value": 3718
+    },
+    {
+      "name": "Time Average Rebalance Cost",
+      "value": 859.0
+    },
+    {
+      "name": "Lyapunov",
+      "value": 13019.5
+    },
+    {
+      "name": "Lyapunov Drift",
+      "value": 12872.0
+    },
+    {
+      "name": "Cumulative Lyapunov",
+      "value": 12601.0
+    },
+    {
+      "name": "Time Average Conditional Drift",
+      "value": 6300.5
+    }
+  ],
+  [
+    {
+      "name": "Cycle Count",
+      "value": 3
+    },
+    {
+      "name": "Moved Bikes",
+      "value": 5088
+    },
+    {
+      "name": "Cumulative Moved Bikes",
+      "value": 11881
+    },
+    {
+      "name": "Rebalanced Bikes",
+      "value": 1000
+    },
+    {
+      "name": "Cumulative Rebalanced Bikes",
+      "value": 4718
+    },
+    {
+      "name": "Rebalanced Cost",
+      "value": 2000
+    },
+    {
+      "name": "Cumulative Rebalance Cost",
+      "value": 5718
+    },
+    {
+      "name": "Time Average Rebalance Cost",
+      "value": 1239.3333333333333
+    },
+    {
+      "name": "Lyapunov",
+      "value": 9025.5
+    },
+    {
+      "name": "Lyapunov Drift",
+      "value": -3994.0
+    },
+    {
+      "name": "Cumulative Lyapunov",
+      "value": 8607.0
+    },
+    {
+      "name": "Time Average Conditional Drift",
+      "value": 2869.0
+    }
+  ],
+  [
+    {
+      "name": "Cycle Count",
+      "value": 4
+    },
+    {
+      "name": "Moved Bikes",
+      "value": 4875
+    },
+    {
+      "name": "Cumulative Moved Bikes",
+      "value": 16756
+    },
+    {
+      "name": "Rebalanced Bikes",
+      "value": 1000
+    },
+    {
+      "name": "Cumulative Rebalanced Bikes",
+      "value": 5718
+    },
+    {
+      "name": "Rebalanced Cost",
+      "value": 2000
+    },
+    {
+      "name": "Cumulative Rebalance Cost",
+      "value": 7718
+    },
+    {
+      "name": "Time Average Rebalance Cost",
+      "value": 1429.5
+    },
+    {
+      "name": "Lyapunov",
+      "value": 11263.5
+    },
+    {
+      "name": "Lyapunov Drift",
+      "value": 2238.0
+    },
+    {
+      "name": "Cumulative Lyapunov",
+      "value": 10845.0
+    },
+    {
+      "name": "Time Average Conditional Drift",
+      "value": 2711.25
+    }
+  ],
+  [
+    {
+      "name": "Cycle Count",
+      "value": 5
+    },
+    {
+      "name": "Moved Bikes",
+      "value": 7562
+    },
+    {
+      "name": "Cumulative Moved Bikes",
+      "value": 24318
+    },
+    {
+      "name": "Rebalanced Bikes",
+      "value": 1000
+    },
+    {
+      "name": "Cumulative Rebalanced Bikes",
+      "value": 6718
+    },
+    {
+      "name": "Rebalanced Cost",
+      "value": 2000
+    },
+    {
+      "name": "Cumulative Rebalance Cost",
+      "value": 9718
+    },
+    {
+      "name": "Time Average Rebalance Cost",
+      "value": 1543.6
+    },
+    {
+      "name": "Lyapunov",
+      "value": 20886.5
+    },
+    {
+      "name": "Lyapunov Drift",
+      "value": 9623.0
+    },
+    {
+      "name": "Cumulative Lyapunov",
+      "value": 20468.0
+    },
+    {
+      "name": "Time Average Conditional Drift",
+      "value": 4093.6
+    }
+  ],
+  [
+    {
+      "name": "Cycle Count",
+      "value": 6
+    },
+    {
+      "name": "Moved Bikes",
+      "value": 7392
+    },
+    {
+      "name": "Cumulative Moved Bikes",
+      "value": 31710
+    },
+    {
+      "name": "Rebalanced Bikes",
+      "value": 1000
+    },
+    {
+      "name": "Cumulative Rebalanced Bikes",
+      "value": 7718
+    },
+    {
+      "name": "Rebalanced Cost",
+      "value": 2000
+    },
+    {
+      "name": "Cumulative Rebalance Cost",
+      "value": 11718
+    },
+    {
+      "name": "Time Average Rebalance Cost",
+      "value": 1619.6666666666667
+    },
+    {
+      "name": "Lyapunov",
+      "value": 23666.0
+    },
+    {
+      "name": "Lyapunov Drift",
+      "value": 2779.5
+    },
+    {
+      "name": "Cumulative Lyapunov",
+      "value": 23247.5
+    },
+    {
+      "name": "Time Average Conditional Drift",
+      "value": 3874.5833333333335
+    }
+  ],
+  [
+    {
+      "name": "Cycle Count",
+      "value": 7
+    },
+    {
+      "name": "Moved Bikes",
+      "value": 2423
+    },
+    {
+      "name": "Cumulative Moved Bikes",
+      "value": 34133
+    },
+    {
+      "name": "Rebalanced Bikes",
+      "value": 589
+    },
+    {
+      "name": "Cumulative Rebalanced Bikes",
+      "value": 8307
+    },
+    {
+      "name": "Rebalanced Cost",
+      "value": 589
+    },
+    {
+      "name": "Cumulative Rebalance Cost",
+      "value": 12307
+    },
+    {
+      "name": "Time Average Rebalance Cost",
+      "value": 1674.0
+    },
+    {
+      "name": "Lyapunov",
+      "value": 24494.5
+    },
+    {
+      "name": "Lyapunov Drift",
+      "value": 828.5
+    },
+    {
+      "name": "Cumulative Lyapunov",
+      "value": 24076.0
+    },
+    {
+      "name": "Time Average Conditional Drift",
+      "value": 3439.4285714285716
+    }
+  ]
+]
