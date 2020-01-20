@@ -39,6 +39,8 @@ journeys_count_df['Time'] = journeys_count_df['Time'] - pd.Timedelta(hours=hours
 journeys_count_df.head(10)
 journeys_count_df.describe()
 
+# journeys_df[(journeys_df['Start Time'] < datetime(2017, 8, 1, 8)) & (journeys_df['Start Station ID']==1)]
+
 # Remove stations with no journeys
 stations_no_journey = set(stations['Station ID'].unique()).difference(set(journeys_count_df['Station ID'].unique()))
 stations = stations[~stations['Station ID'].isin(stations_no_journey)]
