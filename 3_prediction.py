@@ -13,8 +13,8 @@ import random
 random.seed(SEED)
 
 # 3. Set `numpy` pseudo-random generator at a fixed value
-from numpy.random import seed
-seed(SEED)
+import numpy as np
+np.random.seed(SEED)
 
 # 4. Set `tensorflow` pseudo-random generator at a fixed value
 import tensorflow as tf
@@ -30,10 +30,10 @@ tf.random.set_seed(SEED)
 # kernel_initializer = keras.initializers.glorot_uniform(seed=SEED)
 # bias_initializer=keras.initializers.Constant(value=0.1)
 
-# import os
 from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.metrics import mean_squared_error
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
@@ -98,52 +98,71 @@ def get_rmse(y_test, y_pred):
 #
 # journeys_count_df = journeys_count_df.drop(columns = ['In(Predict)', 'Out(Predict)'])
 #
-# """Past 7 day MA of same hour"""
-# journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
-# journeys_count_df['Hour'] = journeys_count_df['Time'].dt.hour
-#
-# predict_in = journeys_count_df.groupby(['Station ID', 'Hour'])[['In']].rolling(window=7).mean().shift(1)
-# predict_in.index = predict_in.index.get_level_values(2)
-# journeys_count_df['In(Predict)'] = predict_in.round(0)
-# predict_out = journeys_count_df.groupby(['Station ID', 'Hour'])[['Out']].rolling(window=7).mean().shift(1)
-# predict_out.index = predict_out.index.get_level_values(2)
-# journeys_count_df['Out(Predict)'] = predict_out.round(0)
-#
-# # journeys_count_df[(journeys_count_df['Station ID'] == 1) & (journeys_count_df['Time'].dt.hour == 0)]
-#
-# # journeys_count_df.isnull().sum()
-# # journeys_count_df.head(100)
-# # journeys_count_df.sort_values(by = ['Station ID', 'Hour']).head(20)
-#
-# # predict_df = journeys_count_df.dropna()
-# # get_rmse(predict_df['In'], predict_df['In(Predict)']) # 3.9255441212077766
-# # get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 3.871822155661291
-#
-# predict_df = journeys_count_df[journeys_count_df['Time'] >= PREDICT_START_TIME]
-# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 3.619754257055577
-# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 3.5542678366316647
-#
-# predict_df = predict_df.drop(columns = ['Out', 'In', 'Hour'])
-# predict_df = predict_df.rename(columns = {'In(Predict)': 'In', 'Out(Predict)': 'Out'})
-# predict_df['In'] =  predict_df['In'].astype(int)
-# predict_df['Out'] =  predict_df['Out'].astype(int)
-#
-# predict_df.to_csv('data/processed/london_journeys_predict_with_2h_interval_7DMA.csv', index = False)
+"""Past 7 day MA of same hour"""
+journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
+journeys_count_df['Hour'] = journeys_count_df['Time'].dt.hour
+
+predict_in = journeys_count_df.groupby(['Station ID', 'Hour'])[['In']].rolling(window=7).mean().shift(1)
+predict_in.index = predict_in.index.get_level_values(2)
+journeys_count_df['In(Predict)'] = predict_in.round(0)
+predict_out = journeys_count_df.groupby(['Station ID', 'Hour'])[['Out']].rolling(window=7).mean().shift(1)
+predict_out.index = predict_out.index.get_level_values(2)
+journeys_count_df['Out(Predict)'] = predict_out.round(0)
+
+# journeys_count_df[(journeys_count_df['Station ID'] == 1) & (journeys_count_df['Time'].dt.hour == 0)]
+
+# journeys_count_df.isnull().sum()
+# journeys_count_df.head(100)
+# journeys_count_df.sort_values(by = ['Station ID', 'Hour']).head(20)
+
+# predict_df = journeys_count_df.dropna()
+# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 3.9255441212077766
+# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 3.871822155661291
+
+train_predict_df = journeys_count_df[journeys_count_df['Time'] < PREDICT_START_TIME]
+train_predict_df = train_predict_df.dropna()
+get_rmse(train_predict_df['In'], train_predict_df['In(Predict)']) # 3.619754257055577
+get_rmse(train_predict_df['Out'], train_predict_df['Out(Predict)']) # 3.5542678366316647
+P7MA_train_RMSE = get_rmse(np.concatenate([train_predict_df['In'], train_predict_df['Out']]),
+    np.concatenate([train_predict_df['In(Predict)'], train_predict_df['Out(Predict)']]))
+
+test_predict_df = journeys_count_df[journeys_count_df['Time'] >= PREDICT_START_TIME]
+get_rmse(test_predict_df['In'], test_predict_df['In(Predict)']) # 3.619754257055577
+get_rmse(test_predict_df['Out'], test_predict_df['Out(Predict)']) # 3.5542678366316647
+P7MA_test_RMSE = get_rmse(np.concatenate([test_predict_df['In'], test_predict_df['Out']]),
+    np.concatenate([test_predict_df['In(Predict)'], test_predict_df['Out(Predict)']]))
+
+predict_df = test_predict_df
+predict_df = predict_df.drop(columns = ['Out', 'In', 'Hour'])
+predict_df = predict_df.rename(columns = {'In(Predict)': 'In', 'Out(Predict)': 'Out'})
+predict_df['In'] =  predict_df['In'].astype(int)
+predict_df['Out'] =  predict_df['Out'].astype(int)
+
+predict_df.to_csv('data/processed/london_journeys_predict_with_2h_interval_7DMA.csv', index = False)
 
 """Modelling"""
-def preprocess_journeys_count_df(journeys_count_df):
-    journeys_count_df['DayOfWeek'] = journeys_count_df['Time'].dt.dayofweek
-    journeys_count_df['Hour'] = journeys_count_df['Time'].dt.hour
 
-def get_features_df(journeys_count_df):
-    features = ['In', 'Out', 'Hour', 'DayOfWeek']
+def get_counts_df(journeys_count_df):
     features_df = []
-    for feature in features:
+    for feature in features[:2]:
         feature_values_df = journeys_count_df.pivot(index='Time', columns='Station ID', values=feature)
         feature_values_df.columns = ['{}_{}'.format(feature, col) for col in feature_values_df.columns]
         features_df.append(feature_values_df)
-
     features_df = pd.concat(features_df, axis = 1)
+    return features_df
+
+def get_influencial_features_df(journeys_count_df):
+    features_df = journeys_count_df[['Time']]
+    features_df = features_df.drop_duplicates()
+    features_df['Hour'] = features_df['Time'].dt.hour
+    features_df['DayOfWeek'] = features_df['Time'].dt.dayofweek
+    features_df = features_df.set_index('Time')
+    return features_df
+
+def get_features_df(journeys_count_df):
+    counts_df = get_counts_df(journeys_count_df)
+    influential_features_df = get_influencial_features_df(journeys_count_df)
+    features_df = pd.concat([counts_df, influential_features_df], axis = 1)
     return features_df
 
 def get_historic_features_df(features_df, timesteps):
@@ -191,13 +210,18 @@ def prepare_data(journeys_count_df, timesteps):
     train_X, train_y = x[:-test_len], y[:-test_len]
     test_X, test_y = x[-test_len:], y[-test_len:]
 
+    print('train_X shape: {}'.format(train_X.shape))
+    print('test_X shape: {}'.format(test_X.shape))
+    print('train_y shape: {}'.format(train_y.shape))
+    print('test_y shape: {}'.format(test_y.shape))
+
     return train_X, train_y, test_X, test_y, features_df
 
 def train_model(model, epochs=200):
     earlystopping = EarlyStopping(patience=10, monitor='val_loss',
                                   verbose=2, restore_best_weights=True)
     history = model.fit(train_X, train_y, epochs=epochs, batch_size=32,
-                    validation_data=(test_X, test_y), verbose=2, shuffle=False,
+                    validation_split=0.3, shuffle=False, verbose=2,
                     callbacks=[earlystopping])
     return history
 
@@ -246,7 +270,7 @@ def postprocess_prediction(model_name, predict_df):
     print('Save prediction to {}'.format(filepath))
 
 journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
-station_count = len(journeys_count_df['Station ID'].unique()) # 779
+station_count = len(journeys_count_df['Station ID'].unique()) # 771
 train_X, train_y, test_X, test_y, features_df = prepare_data(journeys_count_df, timesteps = 4)
 
 """LSTM"""
@@ -279,23 +303,71 @@ def build_bi_lstm(x):
     model.compile(loss="mse", optimizer="adam")
     return model
 
-lstm = build_lstm(train_X)
-history = train_model(lstm)
-plot_training_history('LSTM', lstm, history)
-predict_df = make_prediction(lstm, features_df)
-postprocess_prediction('LSTM', predict_df)
+scores_df = pd.DataFrame(columns = ['data', 'model', 'RMSE'])
+get_models = [build_lstm, build_gru, build_bi_lstm]
+model_names = ['LSTM', 'GRU', 'Bi-LSTM']
+epochs = 200
+for i in range(10):
+    for get_model, name in zip(get_models, model_names):
+        model = get_model(train_X)
+        train_model(model, epochs)
+        scores_df.loc[scores_df.shape[0]] = ['Train', name, model.evaluate(train_X, train_y, verbose = 0) ** 0.5]
+        scores_df.loc[scores_df.shape[0]] = ['Test', name, model.evaluate(test_X, test_y, verbose = 0) ** 0.5]
 
-gru = build_gru(train_X)
-history = train_model(gru)
-plot_training_history('GRU', gru, history)
-predict_df = make_prediction(gru, features_df)
-postprocess_prediction('GRU', predict_df)
+scores_df.describe()
+scores_df.to_csv('data/model_performence.csv', index = False)
 
-bi_lstm = build_bi_lstm(train_X)
-history = train_model(bi_lstm)
-plot_training_history('Bidirectional LSTM', bi_lstm, history)
-predict_df = make_prediction(bi_lstm, features_df)
-postprocess_prediction('Bidirectional LSTM', predict_df)
+# scores_df = pd.read_csv('data/model_performence.csv')
+fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False)
+plt.title('Scores Distribution Across Models', size = 25, pad=20)
+plt.xlabel('Models', fontsize = 20)
+plt.ylabel('RMSE', fontsize = 20)
+plt.xticks(fontsize = 15)
+plt.yticks(fontsize = 15)
+plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
+fig.savefig('images/scores_boxplot', dpi = 200)
+
+mean_scores_df = scores_df.groupby(['data', 'model'])['RMSE'].mean().reset_index()
+mean_scores_df.loc[mean_scores_df.shape[0]] = ['Train', '7DMA', P7MA_train_RMSE]
+mean_scores_df.loc[mean_scores_df.shape[0]] = ['Test', '7DMA', P7MA_test_RMSE]
+
+mean_scores_df
+mean_scores_df.to_csv('data/model_mean_RMSE.csv', index = False)
+mean_scores_df
+
+fig = sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
+    order=['7DMA', 'LSTM', 'GRU', 'Bi-LSTM'],
+    hue = 'data', hue_order=['Train', 'Test'], height = 6, aspect = 1.4, legend=False)
+plt.title('Mean RMSEs Across Models', size = 25, pad=20)
+plt.xlabel('Models', fontsize = 20)
+plt.ylabel('Mean RMSE', fontsize = 20)
+plt.xticks(fontsize = 15)
+plt.yticks(fontsize = 15)
+plt.legend(fontsize = 20, bbox_to_anchor=(1, 0.65))
+for p in fig.ax.patches:
+    fig.ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.05),
+                    ha='center', va='bottom', color= 'black', fontsize=15)
+fig.savefig('images/scores_mean', dpi = 200)
+
+
+
+# lstm = build_lstm(train_X)
+# history = train_model(lstm)
+# plot_training_history('LSTM', lstm, history)
+# predict_df = make_prediction(lstm, features_df)
+# postprocess_prediction('LSTM', predict_df)
+#
+# gru = build_gru(train_X)
+# history = train_model(gru)
+# plot_training_history('GRU', gru, history)
+# predict_df = make_prediction(gru, features_df)
+# postprocess_prediction('GRU', predict_df)
+#
+# bi_lstm = build_bi_lstm(train_X)
+# history = train_model(bi_lstm)
+# plot_training_history('Bidirectional LSTM', bi_lstm, history)
+# predict_df = make_prediction(bi_lstm, features_df)
+# postprocess_prediction('Bidirectional LSTM', predict_df)
 
 # # Make prediction given a time
 # journeys_predict_df = pd.read_csv('data/processed/london_journeys_predict_with_2h_interval_LSTM.csv', parse_dates=['Time'])
