@@ -1,48 +1,37 @@
-import json
-with open('result.json') as json_file:
-    data = json.load(json_file)
+import pandas as pd
+import matplotlib.pyplot as plt
 
-data_df = {value['name']:[] for value in data[0]}
-for record in data:
-    for value in record:
-        data_df[value['name']].append(value['value'])
+results_df = pd.read_csv('data/results/cycle_results.csv', parse_dates=['Time'])
+results_df['Hour'] = results_df['Time'].dt.hour
+cycles = results_df.shape[0] * 2
 
-data_df = pd.DataFrame(data_df)
-data_df = data_df[[value['name'] for value in data[0]]]
-data_df.to_csv('result.csv', index = False)
+fig = plt.figure(figsize=(12, 8))
+plt.title('Demand-Supply Gap', size=25, pad=20)
+plt.plot(results_df['Hour'], results_df['Supply Demand Gap Before Rebalance'], marker = 'o', markersize = 12)
+plt.plot(results_df['Hour'], results_df['Supply Demand Gap After Rebalance'], marker = 'v', markersize = 12)
+plt.xlabel('Hours in a Day', size=20)
+plt.ylabel('No. of Shareable Bikes', size=20)
+plt.xticks(size=15, ticks=range(0, cycles, 2))
+plt.yticks(size=15)
+plt.legend(fontsize=14)
+fig.savefig('images/Demand Supply Gap', dpi = 200)
 
-from geopy.distance import distance
-from datetime import datetime
+fig = plt.figure(figsize=(12, 8))
+plt.title('Usage vs. Rebalance', size=25, pad=20)
+plt.plot(results_df['Hour'], results_df['Moved Bikes'], marker = 'o', markersize = 12)
+plt.plot(results_df['Hour'], results_df['Rebalanced Bikes'], marker = 'v', markersize = 12)
+plt.xlabel('Hours in a Day', size=20)
+plt.ylabel('No. of Shareable Bikes', size=20)
+plt.xticks(size=15, ticks=range(0, cycles, 2))
+plt.yticks(size=15)
+plt.legend(fontsize=14)
+fig.savefig('images/Usage vs Rebalance', dpi = 200)
 
-df = pd.read_csv('supply_demand_gap.csv')
-df[df['Cycle1 (Bef)'] > 0]['Cycle1 (Bef)'].sum()
+# supply_demand_gap_df = pd.read_csv('data/results/supply_demand_gap.csv')
+# supply_demand_gap_df[supply_demand_gap_df['Cycle8 (Bef)'] > 0]['Cycle8 (Bef)'].sum()
+# supply_demand_gap_df[supply_demand_gap_df['Cycle8 (Aft)'] > 0]['Cycle8 (Aft)'].sum()
+# supply_demand_gap_df.describe()
 
-df = pd.read_csv('cycle_results.csv')
-df
-
-
-# 3. Visualization
-
-# # Average Station Hourly Demand
-# hourly_df = get_time_groups('Start', granularity, 'Cluster ID')
-# hourly_df = hourly_df.rename(columns={0: 'Out', 'Start Station ID': 'Station ID', 'Start Time': 'Time'})
-# hourly_df['Weekday'] = hourly_df['Time'].apply(lambda x: calendar.day_name[x.weekday()])
-# hourly_df['Hour'] = hourly_df['Time'].apply(lambda x: x.hour)
-# hourly_df['Week Hour'] = hourly_df['Time'].apply(lambda x: x.weekday() * 24 + x.hour)
-#
-# weeks = [g for n, g in hourly_df.groupby(pd.Grouper(key='Time', freq='W'))]
-# fig = plt.figure(figsize=(24, 10))
-# plt.title('Average Station Hourly Demand by Week', size=30)
-# colors = sns.cubehelix_palette(8)[1:]
-# for i, week in enumerate(weeks[1:-1]):
-#     sns.lineplot(week['Week Hour'], week['Out'], color=colors[i], ci=None, label="Week {}".format(i+1))
-# plt.xlabel('Weekday', size=24)
-# plt.ylabel('Trips', size=24)
-# plt.xticks(size=20, ticks=range(15, 24*7, 24), labels=list(calendar.day_name))
-# plt.yticks(size=20)
-# plt.legend(fontsize=24)
-# fig.savefig('images/avg_station_hourly_demand')
-#
 # # station 1 incoming and outgoing trips
 # station_1_sept_journeys = journeys_count_df[(journeys_count_df['Station ID'] == 1) & (journeys_count_df['Time'].apply(lambda t: t.month) == 8)]
 # fig = plt.figure(figsize=(24, 10))
