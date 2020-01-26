@@ -21,6 +21,7 @@ stations = pd.read_csv('data/london/stations.csv')
 journeys_df = pd.read_csv('data/processed/london_clean_journeys.csv', parse_dates=['Start Time', 'End Time'])
 # journeys_df.info()
 # journeys_df.head()
+journeys_df.describe()
 
 # group journeys by Station ID and by set window intervals
 def get_time_groups(grouper_key, granularity, groupby):
@@ -44,6 +45,7 @@ journeys_count_df.describe()
 # Remove stations with no journeys
 stations_no_journey = set(stations['Station ID'].unique()).difference(set(journeys_count_df['Station ID'].unique()))
 stations = stations[~stations['Station ID'].isin(stations_no_journey)]
+len(stations['Station ID'].unique())
 
 # Export to json
 stations_dict = []
@@ -59,3 +61,34 @@ with open('data/processed/london_stations.json', 'w', encoding='utf-8') as f:
 
 journeys_count_df = journeys_count_df[journeys_count_df['Station ID'].isin(stations['Station ID'])]
 journeys_count_df.to_csv('data/processed/london_journeys_count_with_{}h_interval.csv'.format(hours), index=False)
+
+
+# Average Station Hourly Demand
+journeys_count_df['Weekday'] = journeys_count_df['Time'].apply(lambda x: calendar.day_name[x.weekday()])
+journeys_count_df['Hour'] = journeys_count_df['Time'].apply(lambda x: x.hour)
+journeys_count_df['Week Hour'] = journeys_count_df['Time'].apply(lambda x: x.weekday() * 24 + x.hour)
+weeks = [g for n, g in journeys_count_df.groupby(pd.Grouper(key='Time', freq='W'))]
+
+fig = plt.figure(figsize=(15, 8))
+plt.title('Average Station 2-hour Interval Demand by Week', size=25, pad=20)
+colors = sns.cubehelix_palette(8)[1:]
+for i, week in enumerate(weeks[1:-1]):
+    sns.lineplot(week['Week Hour'], week['Out'], color=colors[i], ci=None, label="Week {}".format(i+1))
+plt.xlabel('DayOfWeek', size=20)
+plt.ylabel('Trips', size=20)
+plt.xticks(size=15, ticks=range(15, 24*7, 24), labels=list(calendar.day_name))
+plt.yticks(size=15)
+plt.legend(fontsize=15)
+fig.savefig('images/avg_station_hourly_demand', dpi = 200)
+
+fig = plt.figure(figsize=(15, 8))
+plt.title('Average Station 2-hour Interval Supply by Week', size=25, pad=20)
+colors = sns.cubehelix_palette(8)[1:]
+for i, week in enumerate(weeks[1:-1]):
+    sns.lineplot(week['Week Hour'], week['In'], color=colors[i], ci=None, label="Week {}".format(i+1))
+plt.xlabel('DayOfWeek', size=20)
+plt.ylabel('Trips', size=20)
+plt.xticks(size=15, ticks=range(15, 24*7, 24), labels=list(calendar.day_name))
+plt.yticks(size=15)
+plt.legend(fontsize=15)
+fig.savefig('images/avg_station_hourly_supply', dpi = 200)
