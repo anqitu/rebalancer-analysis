@@ -46,7 +46,7 @@ len(existing_tiemsteps)
 all_timesteps = list(pd.date_range(START_DATE, periods=12*365, freq=str(granularity) + 'Min'))
 len(all_timesteps)
 
-journeys_count_df.shape[0]  # 3490063
+journeys_count_df.shape[0] # 3490063
 
 missing_timesteps = set(all_timesteps).difference(set(existing_tiemsteps))
 for timestep in missing_timesteps:
@@ -79,6 +79,7 @@ journeys_count_df = journeys_count_df[journeys_count_df['Station ID'].isin(stati
 journeys_count_df = journeys_count_df.sort_values(['Station ID', 'Time'])
 journeys_count_df.to_csv('data/processed/london_journeys_count_with_{}h_interval.csv'.format(hours), index=False)
 journeys_count_df.sort_values(['Station ID', 'Time']).head(50)
+
 
 # Average Station Hourly Demand
 dayofweek_mapper = dict(enumerate(list(calendar.day_name)))
