@@ -40,19 +40,19 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, GRU, Bidirectional, Dense
 from tensorflow.keras.callbacks import EarlyStopping
 
-PREDICT_START_TIME = datetime(year = 2017, month = 9, day = 10, hour = 0)
+TEST_PREDICT_START_TIME = datetime(year = 2019, month = 9, day = 1, hour = 0)
 
 def get_rmse(y_test, y_pred):
     return mean_squared_error(y_test, y_pred) ** 0.5
 
-# journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
+journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
 # journeys_count_df.info()
 # journeys_count_df.head(10)
-# journeys_count_df.describe()
+journeys_count_df.describe()
 #      Out	    In
-# std  5.705519	5.939836
+# std  5.398425 5.599227
 
-# journeys_count_df = journeys_count_df[journeys_count_df['Station ID'] <= 2]
+journeys_count_df = journeys_count_df[journeys_count_df['Station ID'] <= 2]
 
 # """Same hour of Previous day (Same hour)"""
 # journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
@@ -109,7 +109,9 @@ predict_out = journeys_count_df.groupby(['Station ID', 'Hour'])[['Out']].rolling
 predict_out.index = predict_out.index.get_level_values(2)
 journeys_count_df['Out(Predict)'] = predict_out.round(0)
 
-# journeys_count_df[(journeys_count_df['Station ID'] == 1) & (journeys_count_df['Time'].dt.hour == 0)]
+# journeys_count_df.sort_values(['Station ID', 'Time'])
+# journeys_count_df[(journeys_count_df['Station ID'] == 1) & (journeys_count_df['Time'].dt.hour == 2)].head(50)
+# predict_in.head(50)
 
 # journeys_count_df.isnull().sum()
 # journeys_count_df.head(100)
@@ -119,29 +121,36 @@ journeys_count_df['Out(Predict)'] = predict_out.round(0)
 # get_rmse(predict_df['In'], predict_df['In(Predict)']) # 3.9255441212077766
 # get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 3.871822155661291
 
-train_predict_df = journeys_count_df[journeys_count_df['Time'] < PREDICT_START_TIME]
-train_predict_df = train_predict_df.dropna()
-get_rmse(train_predict_df['In'], train_predict_df['In(Predict)']) # 3.619754257055577
-get_rmse(train_predict_df['Out'], train_predict_df['Out(Predict)']) # 3.5542678366316647
+TRAIN_PREDICT_START_TIME = datetime(year = 2019, month = 1, day = 8, hour = 0)
+train_predict_df = journeys_count_df[(journeys_count_df['Time'] < TEST_PREDICT_START_TIME) & (journeys_count_df['Time'] >= TRAIN_PREDICT_START_TIME)]
+# train_predict_df.shape
+# train_predict_df.isnull().sum()
+train_predict_df['Time'].min() # Timestamp('2019-01-08 00:00:00')
+train_predict_df.shape[0] / 771 # 2832
+
+get_rmse(train_predict_df['In'], train_predict_df['In(Predict)']) # 5.50112540671441
+get_rmse(train_predict_df['Out'], train_predict_df['Out(Predict)']) # 3.666249708995289
 P7MA_train_RMSE = get_rmse(np.concatenate([train_predict_df['In'], train_predict_df['Out']]),
     np.concatenate([train_predict_df['In(Predict)'], train_predict_df['Out(Predict)']]))
+# 4.674599858228874
 
-test_predict_df = journeys_count_df[journeys_count_df['Time'] >= PREDICT_START_TIME]
-get_rmse(test_predict_df['In'], test_predict_df['In(Predict)']) # 3.619754257055577
-get_rmse(test_predict_df['Out'], test_predict_df['Out(Predict)']) # 3.5542678366316647
+test_predict_df = journeys_count_df[journeys_count_df['Time'] >= TEST_PREDICT_START_TIME]
+test_predict_df['Time'].min()
+get_rmse(test_predict_df['In'], test_predict_df['In(Predict)']) # 4.523017029928338
+get_rmse(test_predict_df['Out'], test_predict_df['Out(Predict)']) # 3.269560289610032
 P7MA_test_RMSE = get_rmse(np.concatenate([test_predict_df['In'], test_predict_df['Out']]),
     np.concatenate([test_predict_df['In(Predict)'], test_predict_df['Out(Predict)']]))
+# 3.94637222904889
+test_predict_df.shape[0] / 771 # 1464
 
 predict_df = test_predict_df
 predict_df = predict_df.drop(columns = ['Out', 'In', 'Hour'])
 predict_df = predict_df.rename(columns = {'In(Predict)': 'In', 'Out(Predict)': 'Out'})
 predict_df['In'] =  predict_df['In'].astype(int)
 predict_df['Out'] =  predict_df['Out'].astype(int)
-
 predict_df.to_csv('data/processed/london_journeys_predict_with_2h_interval_7DMA.csv', index = False)
 
 """Modelling"""
-
 def get_counts_df(journeys_count_df):
     features_df = []
     for feature in features[:2]:
@@ -206,7 +215,7 @@ def prepare_data(journeys_count_df, timesteps):
     y = get_outputs(features_df, timesteps)
 
     # split into input and outputs
-    test_len = sum(features_df.index >= PREDICT_START_TIME)
+    test_len = sum(features_df.index >= TEST_PREDICT_START_TIME)
     train_X, train_y = x[:-test_len], y[:-test_len]
     test_X, test_y = x[-test_len:], y[-test_len:]
 
@@ -271,7 +280,15 @@ def postprocess_prediction(model_name, predict_df):
 
 journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
 station_count = len(journeys_count_df['Station ID'].unique()) # 771
-train_X, train_y, test_X, test_y, features_df = prepare_data(journeys_count_df, timesteps = 4)
+train_X, train_y, test_X, test_y, features_df = prepare_data(journeys_count_df, timesteps = 7*12)
+
+# x shape: (4296, 84, 1544)
+# y shape: (4296, 1542)
+# train_X shape: (2832, 84, 1544)
+# test_X shape: (1464, 84, 1544)
+# train_y shape: (2832, 1542)
+# test_y shape: (1464, 1542)
+
 
 """LSTM"""
 def build_lstm(x):
@@ -351,11 +368,11 @@ fig.savefig('images/scores_mean', dpi = 200)
 
 
 
-# lstm = build_lstm(train_X)
-# history = train_model(lstm)
-# plot_training_history('LSTM', lstm, history)
-# predict_df = make_prediction(lstm, features_df)
-# postprocess_prediction('LSTM', predict_df)
+lstm = build_lstm(train_X)
+history = train_model(lstm)
+plot_training_history('LSTM', lstm, history)
+predict_df = make_prediction(lstm, features_df)
+postprocess_prediction('LSTM', predict_df)
 #
 # gru = build_gru(train_X)
 # history = train_model(gru)
