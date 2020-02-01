@@ -61,7 +61,7 @@ def get_rmse(y_test, y_pred):
 
 # journeys_count_df = journeys_count_df[journeys_count_df['Station ID'] <= 2]
 
-# """Same hour of Previous day (Same hour)"""
+"""Same hour of Previous day (Same hour)"""
 # journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
 # journeys_count_df['Hour'] = journeys_count_df['Time'].dt.hour
 #
@@ -70,21 +70,21 @@ def get_rmse(y_test, y_pred):
 # predict_out = journeys_count_df.groupby(['Station ID', 'Hour'])[['Out']].shift(1)
 # journeys_count_df['Out(Predict)'] = predict_out.round(0)
 #
-# # journeys_count_df[pd.isna(journeys_count_df['In(Predict)'])]
+# journeys_count_df[pd.isna(journeys_count_df['In(Predict)'])]
 # # journeys_count_df.head(30)
 # # journeys_count_df.iloc[599:650]
 #
 # predict_df = journeys_count_df.dropna()
-# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 4.5472509019451115
-# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 4.527446168898598
+# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 4.276613034755501
+# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 4.251557661842484
 #
 # predict_df = journeys_count_df[journeys_count_df['Time'] >= TEST_PREDICT_START_TIME]
-# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 4.4038030492188005
-# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 4.362692858828626
+# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 4.063323480712249
+# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 4.013350239527448
 #
 # journeys_count_df = journeys_count_df.drop(columns = ['In(Predict)', 'Out(Predict)'])
-#
-# """Same hour of past 7th date (Same hour of same dayofweek)"""
+
+"""Same hour of past 7th date (Same hour of same dayofweek)"""
 # journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
 # journeys_count_df['Hour'] = journeys_count_df['Time'].dt.hour
 #
@@ -94,17 +94,47 @@ def get_rmse(y_test, y_pred):
 # journeys_count_df['Out(Predict)'] = predict_out.round(0)
 #
 # # journeys_count_df.head(90)
+# # journeys_count_df[pd.isna(journeys_count_df['In(Predict)'])]
 #
 # predict_df = journeys_count_df.dropna()
-# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 4.0487652838133315
-# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 4.168556656066862
+# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 3.6700835744865685
+# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 3.7639595094969187
 #
-# predict_df = journeys_count_df[journeys_count_df['Time'] >= TEST_PREDICT_START_TIME]
-# get_rmse(predict_df['In'], predict_df['In(Predict)']) # 3.872670782859088
-# get_rmse(predict_df['Out'], predict_df['Out(Predict)']) # 3.966964623457324
+# TRAIN_PREDICT_START_TIME = datetime(year = 2018, month = 1, day = 8, hour = 0)
 #
-# journeys_count_df = journeys_count_df.drop(columns = ['In(Predict)', 'Out(Predict)'])
+# journeys_count_df = journeys_count_df[(journeys_count_df['Time'] >= TRAIN_PREDICT_START_TIME)]
+# LWSDSH_all_RMSE = get_rmse(np.concatenate([journeys_count_df['In'], journeys_count_df['Out']]),
+#     np.concatenate([journeys_count_df['In(Predict)'], journeys_count_df['Out(Predict)']]))
+# LWSDSH_all_RMSE # 3.717317892839432
 #
+# train_predict_df = journeys_count_df[(journeys_count_df['Time'] < TEST_PREDICT_START_TIME) & (journeys_count_df['Time'] >= TRAIN_PREDICT_START_TIME)]
+# train_predict_df.shape[0]
+# # train_predict_df.isnull().sum()
+# train_predict_df['Time'].min() # Timestamp('2018-01-08 00:00:00')
+# train_predict_df.shape[0] / 773 # 3192
+#
+# get_rmse(train_predict_df['In'], train_predict_df['In(Predict)']) # 3.7741348440706726
+# get_rmse(train_predict_df['Out'], train_predict_df['Out(Predict)']) # 3.87066731303867
+# LWSDSH_train_RMSE = get_rmse(np.concatenate([train_predict_df['In'], train_predict_df['Out']]),
+#     np.concatenate([train_predict_df['In(Predict)'], train_predict_df['Out(Predict)']]))
+# LWSDSH_train_RMSE # 3.8227058001796554
+#
+# test_predict_df = journeys_count_df[journeys_count_df['Time'] >= TEST_PREDICT_START_TIME]
+# test_predict_df['Time'].min() # Timestamp('2018-10-01 00:00:00')
+# get_rmse(test_predict_df['In'], test_predict_df['In(Predict)']) # 3.351114117793388
+# get_rmse(test_predict_df['Out'], test_predict_df['Out(Predict)']) # 3.4368473870325738
+# LWSDSH_test_RMSE = get_rmse(np.concatenate([test_predict_df['In'], test_predict_df['Out']]),
+#     np.concatenate([test_predict_df['In(Predict)'], test_predict_df['Out(Predict)']]))
+# LWSDSH_test_RMSE # 3.394251448569094
+# test_predict_df.shape[0] / 773 # 1104
+#
+# predict_df = test_predict_df
+# predict_df = predict_df.drop(columns = ['Out', 'In', 'Hour'])
+# predict_df = predict_df.rename(columns = {'In(Predict)': 'In', 'Out(Predict)': 'Out'})
+# predict_df['In'] =  predict_df['In'].astype(int)
+# predict_df['Out'] =  predict_df['Out'].astype(int)
+# predict_df.to_csv(WORKING_DIR + '/data/processed/london_journeys_predict_with_2h_interval_LWSDSH.csv', index = False)
+
 
 """Past 7 day MA of same hour"""
 # journeys_count_df = pd.read_csv(WORKING_DIR + '/data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
@@ -379,7 +409,7 @@ scores_df = scores_df.sort_values(['model', 'data'])
 scores_df.to_csv(WORKING_DIR + '/results/model_performence.csv', index = False)
 
 scores_df = pd.read_csv(WORKING_DIR + '/results/model_performence.csv')
-fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False)
+fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False, hue_order = ['Train', 'Test'])
 plt.title('Scores Distribution Across Models', size = 25, pad=20)
 plt.xlabel('Models', fontsize = 20)
 plt.ylabel('RMSE', fontsize = 20)
