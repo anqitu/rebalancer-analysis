@@ -3,6 +3,8 @@ RNN_LAYER_UNITS = 50
 DENSE_LAYER_UNITS = 100
 EPOCHS = 200
 MODEL_EXPERIMENT_TIMES = 30
+WEATHER = 'daily'
+# WEATHER = 'hourly'
 WORKING_DIR = "."
 
 import warnings
@@ -215,6 +217,19 @@ def get_influencial_features_df(journeys_count_df):
     print('Processing Influential Features Data')
     features_df = journeys_count_df[['Time']]
     features_df = features_df.drop_duplicates()
+
+    if WEATHER == 'hourly':
+        print('Adding hourly weather info ----------')
+        weather_df = pd.read_csv(WORKING_DIR + '/data/processed/london_hourly_weather.csv', parse_dates=['Time'])
+        features_df = features_df.merge(weather_df)
+    elif WEATHER == 'daily':
+        print('Adding daily weather info ----------')
+        daily_data_df = pd.read_csv(WORKING_DIR + '/data/processed/london_daily_weather.csv', parse_dates=['Time'])
+        features_df = features_df.merge(daily_data_df, how = 'left')
+        features_df = features_df.fillna(method = 'ffill')
+    else:
+        print('Adding no weather info ----------')
+
     features_df['Hour'] = features_df['Time'].dt.hour
     features_df['DayOfWeek'] = features_df['Time'].dt.dayofweek
     features_df = features_df.set_index('Time')
@@ -360,8 +375,9 @@ def build_bi_lstm(x, y):
     model.compile(loss="mse", optimizer="adam")
     return model
 
+# journeys_count_df = pd.read_csv(WORKING_DIR + '/data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
 journeys_count_df = pd.read_csv(WORKING_DIR + '/data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
-# journeys_count_df = journeys_count_df[journeys_count_df['Station ID'] <= 2]
+journeys_count_df = journeys_count_df[journeys_count_df['Station ID'] <= 2]
 station_count = len(journeys_count_df['Station ID'].unique()) # 773
 train_X, train_y, test_X, test_y, features_df = prepare_data(journeys_count_df, timesteps = TIMESTEPS)
 

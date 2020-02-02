@@ -12,6 +12,7 @@ import json
 # START_DATE = datetime(year = 2018, month = 1, day = 1, hour = 0)
 #
 # stations = pd.read_csv('data/raw/stations.csv')
+# stations.describe()
 # len(stations['Station ID'].unique())
 #
 # journeys_df = pd.read_csv('data/processed/london_clean_journeys.csv',
@@ -87,7 +88,6 @@ import json
 
 # Average Station Hourly Demand
 journeys_count_df = pd.read_csv('data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
-
 dayofweek_mapper = dict(enumerate(list(calendar.day_name)))
 journeys_count_df['DayOfWeek'] = journeys_count_df['Time'].dt.dayofweek.map(dayofweek_mapper)
 journeys_count_df['Hour'] = journeys_count_df['Time'].dt.hour
@@ -131,3 +131,24 @@ fig.savefig('images/avg_station_hourly_supply', dpi = 200, bbox_inches = 'tight'
 # fig = plt.figure(figsize=(15, 8))
 # sns.lineplot(journeys_count_df.iloc[:10000]['Week Hour'], journeys_count_df.iloc[:10000]['In'])
 # plt.xticks(size=15, ticks=range(15, 24*7, 24), labels=list(calendar.day_name))
+
+
+daily_data_df = pd.read_csv('data/processed/london_daily_weather.csv', parse_dates=['Time'])
+hourly_data_df = pd.read_csv('data/processed/london_hourly_weather.csv', parse_dates=['Time'])
+daily_data_df.shape
+
+
+combined = journeys_count_df.merge(hourly_data_df)
+combined.info()
+combined.corr()
+
+
+journeys_count_df['day'] = journeys_count_df['Time'].dt.dayofyear
+daily_count_df = journeys_count_df.groupby(['day'])[['In', 'Out']].sum()
+daily_data_df.index = daily_data_df['Time'].dt.dayofyear
+daily_data_df.index.name = 'day'
+
+daily_count_df = daily_count_df.reset_index()
+daily_data_df = daily_data_df.reset_index()
+daily_combined = daily_count_df.merge(daily_data_df)
+daily_combined.corr()
