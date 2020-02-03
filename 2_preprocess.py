@@ -151,4 +151,10 @@ daily_data_df.index.name = 'day'
 daily_count_df = daily_count_df.reset_index()
 daily_data_df = daily_data_df.reset_index()
 daily_combined = daily_count_df.merge(daily_data_df)
-daily_combined.corr()
+
+daily_combined.corr()['Out']
+daily_combined.corr()['In']
+
+all_columns = ['day', 'In', 'Out', 'Time', 'rain', 'clear', 'cloudy',
+       'apparentTemperatureHigh', 'apparentTemperatureLow', 'precipIntensity',
+       'dewPoint', 'humidity', 'windSpeed', 'uvIndex', 'visibility']
