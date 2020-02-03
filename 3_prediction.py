@@ -2,14 +2,16 @@
 # RNN_LAYER_UNITS = 128
 # DENSE_LAYER_UNITS = 128
 
-TIMESTEPS = 12
+TIMESTEPS = 2
 RNN_LAYER_UNITS = 128
 DENSE_LAYER_UNITS = 128
+# WEATHER = 'daily'
+# WEATHER = 'hourly'
+WEATHER = ''
+TEST = False
 
 EPOCHS = 200
 MODEL_EXPERIMENT_TIMES = 30
-WEATHER = 'daily'
-# WEATHER = 'hourly'
 
 WORKING_DIR = "."
 
@@ -45,6 +47,7 @@ random.set_seed(SEED)
 # kernel_initializer = keras.initializers.glorot_uniform(seed=SEED)
 # bias_initializer=keras.initializers.Constant(value=0.1)
 
+import shutil
 from datetime import datetime
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -382,7 +385,8 @@ def build_bi_lstm(x, y):
     return model
 
 journeys_count_df = pd.read_csv(WORKING_DIR + '/data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
-# journeys_count_df = journeys_count_df[journeys_count_df['Station ID'] <= 2]
+if TEST:
+    journeys_count_df = journeys_count_df[journeys_count_df['Station ID'] <= 1]
 station_count = len(journeys_count_df['Station ID'].unique()) # 773
 train_X, train_y, test_X, test_y, features_df = prepare_data(journeys_count_df, timesteps = TIMESTEPS)
 
@@ -391,6 +395,13 @@ train_X, train_y, test_X, test_y, features_df = prepare_data(journeys_count_df, 
 scores_df = pd.DataFrame(columns = ['data', 'model', 'RMSE'])
 get_models = [build_lstm, build_gru, build_bi_lstm]
 model_names = ['LSTM', 'GRU', 'Bi-LSTM']
+
+
+
+result_dir = WORKING_DIR + '/results/{} {} {} {}'.format(TIMESTEPS, RNN_LAYER_UNITS, DENSE_LAYER_UNITS, WEATHER).strip()
+if os.path.exists(result_dir):
+    shutil.rmtree(result_dir)
+os.mkdir(result_dir)
 
 for i in range(MODEL_EXPERIMENT_TIMES):
     print('Training {}/{} ---------------------------------'.format(i, MODEL_EXPERIMENT_TIMES))
@@ -402,82 +413,82 @@ for i in range(MODEL_EXPERIMENT_TIMES):
         scores_df.loc[scores_df.shape[0]] = ['Test', name, model.evaluate(test_X, test_y, verbose = 0) ** 0.5]
 
         scores_df = scores_df.sort_values(['model', 'data'])
-        scores_df.to_csv(WORKING_DIR + '/results/model_performence.csv', index = False)
+        scores_df.to_csv(result_dir + '/model_performence.csv', index = False)
         print(scores_df)
 
-        # scores_df = pd.read_csv(WORKING_DIR + '/results/model_performence.csv')
-        # fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False, hue_order = ['Train', 'Test'])
-        # plt.title('Scores Distribution Across Models', size = 25, pad=20)
-        # plt.xlabel('Models', fontsize = 20)
-        # plt.ylabel('RMSE', fontsize = 20)
-        # plt.xticks(fontsize = 15)
-        # plt.yticks(fontsize = 15)
-        # # plt.legend(fontsize = 20)
-        # plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
-        # fig.savefig(WORKING_DIR + '/images/scores_boxplot', dpi = 200, bbox_inches = 'tight')
+        scores_df = pd.read_csv(result_dir + '/model_performence.csv')
+        fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False, hue_order = ['Train', 'Test'])
+        plt.title('Scores Distribution Across Models', size = 25, pad=20)
+        plt.xlabel('Models', fontsize = 20)
+        plt.ylabel('RMSE', fontsize = 20)
+        plt.xticks(fontsize = 15)
+        plt.yticks(fontsize = 15)
+        # plt.legend(fontsize = 20)
+        plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
+        fig.savefig(result_dir + '/scores_boxplot', dpi = 200, bbox_inches = 'tight')
 
         mean_scores_df = scores_df.groupby(['data', 'model'])['RMSE'].mean().reset_index()
         mean_scores_df.loc[mean_scores_df.shape[0]] = ['Train', '7DMA', P7MA_train_RMSE]
         mean_scores_df.loc[mean_scores_df.shape[0]] = ['Test', '7DMA', P7MA_test_RMSE]
         mean_scores_df = mean_scores_df.sort_values(['RMSE'])
-        mean_scores_df.to_csv(WORKING_DIR + '/results/model_mean_RMSE.csv', index = False)
+        mean_scores_df.to_csv(result_dir + '/model_mean_RMSE.csv', index = False)
 
         print(mean_scores_df)
 
-        # mean_scores_df = pd.read_csv(WORKING_DIR + '/results/model_mean_RMSE.csv')
-        # fig = sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
-        #     order=['7DMA', 'LSTM', 'GRU', 'Bi-LSTM'],
-        #     hue = 'data', hue_order=['Train', 'Test'], height = 6, aspect = 1.4, legend=False)
-        # plt.title('Mean RMSEs Across Models', size = 25, pad=20)
-        # plt.xlabel('Models', fontsize = 20)
-        # plt.ylabel('Mean RMSE', fontsize = 20)
-        # plt.xticks(fontsize = 15)
-        # plt.yticks(fontsize = 15)
-        # plt.legend(fontsize = 20)
-        # # plt.legend(fontsize = 20, bbox_to_anchor=(1, 0.65))
-        # for p in fig.ax.patches:
-        #     fig.ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.05),
-        #                     ha='center', va='bottom', color= 'black', fontsize=15)
-        # fig.savefig(WORKING_DIR + '/images/scores_mean', dpi = 200, bbox_inches = 'tight')
+        mean_scores_df = pd.read_csv(result_dir + '/model_mean_RMSE.csv')
+        fig = sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
+            order=['7DMA', 'LSTM', 'GRU', 'Bi-LSTM'],
+            hue = 'data', hue_order=['Train', 'Test'], height = 6, aspect = 1.4, legend=False)
+        plt.title('Mean RMSEs Across Models', size = 25, pad=20)
+        plt.xlabel('Models', fontsize = 20)
+        plt.ylabel('Mean RMSE', fontsize = 20)
+        plt.xticks(fontsize = 15)
+        plt.yticks(fontsize = 15)
+        plt.legend(fontsize = 20)
+        # plt.legend(fontsize = 20, bbox_to_anchor=(1, 0.65))
+        for p in fig.ax.patches:
+            fig.ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.05),
+                            ha='center', va='bottom', color= 'black', fontsize=15)
+        fig.savefig(result_dir + '/scores_mean', dpi = 200, bbox_inches = 'tight')
 
 
-scores_df.describe()
-scores_df = scores_df.sort_values(['model', 'data'])
-scores_df.to_csv(WORKING_DIR + '/results/model_performence.csv', index = False)
-
-scores_df = pd.read_csv(WORKING_DIR + '/results/model_performence.csv')
-fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False, hue_order = ['Train', 'Test'])
-plt.title('Scores Distribution Across Models', size = 25, pad=20)
-plt.xlabel('Models', fontsize = 20)
-plt.ylabel('RMSE', fontsize = 20)
-plt.xticks(fontsize = 15)
-plt.yticks(fontsize = 15)
-plt.legend(fontsize = 20)
-# plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
-fig.savefig(WORKING_DIR + '/images/scores_boxplot', dpi = 200, bbox_inches = 'tight')
-
-mean_scores_df = scores_df.groupby(['data', 'model'])['RMSE'].mean().reset_index()
-mean_scores_df.loc[mean_scores_df.shape[0]] = ['Train', '7DMA', P7MA_train_RMSE]
-mean_scores_df.loc[mean_scores_df.shape[0]] = ['Test', '7DMA', P7MA_test_RMSE]
-mean_scores_df = mean_scores_df.sort_values(['RMSE'])
-mean_scores_df.to_csv(WORKING_DIR + '/results/model_mean_RMSE.csv', index = False)
-mean_scores_df
-
-mean_scores_df = pd.read_csv(WORKING_DIR + '/results/model_mean_RMSE.csv')
-fig = sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
-    order=['7DMA', 'LSTM', 'GRU', 'Bi-LSTM'],
-    hue = 'data', hue_order=['Train', 'Test'], height = 6, aspect = 1.4, legend=False)
-plt.title('Mean RMSEs Across Models', size = 25, pad=20)
-plt.xlabel('Models', fontsize = 20)
-plt.ylabel('Mean RMSE', fontsize = 20)
-plt.xticks(fontsize = 15)
-plt.yticks(fontsize = 15)
-plt.legend(fontsize = 20)
-# plt.legend(fontsize = 20, bbox_to_anchor=(1, 0.65))
-for p in fig.ax.patches:
-    fig.ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.05),
-                    ha='center', va='bottom', color= 'black', fontsize=15)
-fig.savefig(WORKING_DIR + '/images/scores_mean', dpi = 200, bbox_inches = 'tight')
+# scores_df.describe()
+# scores_df = scores_df.sort_values(['model', 'data'])
+# scores_df.to_csv(WORKING_DIR + '/results/model_performence.csv', index = False)
+#
+# scores_df = pd.read_csv(WORKING_DIR + '/results/model_performence.csv')
+# fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False, hue_order = ['Train', 'Test'])
+# plt.title('Scores Distribution Across Models', size = 25, pad=20)
+# plt.xlabel('Models', fontsize = 20)
+# plt.ylabel('RMSE', fontsize = 20)
+# plt.xticks(fontsize = 15)
+# plt.yticks(fontsize = 15)
+# plt.legend(fontsize = 20)
+# # plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
+# fig.savefig(WORKING_DIR + '/images/scores_boxplot', dpi = 200, bbox_inches = 'tight')
+#
+# mean_scores_df = scores_df.groupby(['data', 'model'])['RMSE'].mean().reset_index()
+# mean_scores_df.loc[mean_scores_df.shape[0]] = ['Train', '7DMA', P7MA_train_RMSE]
+# mean_scores_df.loc[mean_scores_df.shape[0]] = ['Test', '7DMA', P7MA_test_RMSE]
+# mean_scores_df = mean_scores_df.sort_values(['RMSE'])
+# mean_scores_df.to_csv(WORKING_DIR + '/results/model_mean_RMSE.csv', index = False)
+# mean_scores_df
+#
+# mean_scores_df = pd.read_csv(WORKING_DIR + '/results/model_mean_RMSE.csv')
+# fig = sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
+#     order=['7DMA', 'LSTM', 'GRU', 'Bi-LSTM'],
+#     hue = 'data', hue_order=['Train', 'Test'], height = 6, aspect = 1.4, legend=False)
+# plt.title('Mean RMSEs Across Models', size = 25, pad=20)
+# plt.xlabel('Models', fontsize = 20)
+# plt.ylabel('Mean RMSE', fontsize = 20)
+# plt.xticks(fontsize = 15)
+# plt.yticks(fontsize = 15)
+# plt.legend(fontsize = 20)
+# # plt.legend(fontsize = 20, bbox_to_anchor=(1, 0.65))
+# for p in fig.ax.patches:
+#     fig.ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.05),
+#                     ha='center', va='bottom', color= 'black', fontsize=15)
+# fig.savefig(WORKING_DIR + '/images/scores_mean', dpi = 200, bbox_inches = 'tight')
 
 """Build Single Model"""
 # lstm = build_lstm(train_X, train_y)
