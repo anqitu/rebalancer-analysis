@@ -1,4 +1,11 @@
-
-data/
-
 __pycache__/
+
+data/processed/london_clean_journeys.csv
+
+data/raw/journeys-tfl/2017/
+
+data/raw/journeys-tfl/2018/
+
+data/raw/journeys-tfl/2019/
+
+data/raw/
