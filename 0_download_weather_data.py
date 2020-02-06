@@ -34,13 +34,14 @@ daily_data_df['icon'].value_counts()
 
 
 daily_data_df['time'] = pd.to_datetime(daily_data_df['time'],unit='s')
-daily_data_df = daily_data_df.fillna(method = 'ffill').fillna(method = 'bfill')
+daily_data_df = daily_data_df.fillna(daily_data_df.median())
 daily_data_df['icon'] = daily_data_df['icon'].replace('partly-cloudy-day', 'cloudy').replace('clear-day', 'clear')
 daily_data_df['rain'] = (daily_data_df['icon'] == 'rain').astype(int)
 daily_data_df['clear'] = (daily_data_df['icon'] == 'clear').astype(int)
 daily_data_df['cloudy'] = (daily_data_df['icon'] == 'cloudy').astype(int)
 daily_data_df = daily_data_df[['time', 'rain', 'clear', 'cloudy', 'apparentTemperatureHigh', 'apparentTemperatureLow', 'precipIntensity', 'dewPoint', 'humidity', 'windSpeed', 'uvIndex', 'visibility']]
-daily_data_df = daily_data_df.rename(columns = {'time': 'Time'})
+daily_data_df.columns = ['{}_d'.format(col) for col in daily_data_df.columns]
+daily_data_df = daily_data_df.rename(columns = {'time_d': 'Time'})
 
 hourly_data_df = pd.DataFrame(data=hourly_data)
 hourly_data_df.describe(include='all')
@@ -52,13 +53,14 @@ hourly_data_df[hourly_data_df.isnull().any(axis=1)]
 
 
 hourly_data_df['time'] = pd.to_datetime(hourly_data_df['time'],unit='s')
-hourly_data_df = hourly_data_df.fillna(method = 'ffill')
+hourly_data_df = hourly_data_df.fillna(daily_data_df.median())
 hourly_data_df['icon'] = hourly_data_df['icon'].replace('partly-cloudy-day', 'cloudy').replace('partly-cloudy-night', 'cloudy').replace('clear-day', 'clear').replace('clear-night', 'clear')
 hourly_data_df['rain'] = (hourly_data_df['icon'] == 'rain').astype(int)
 hourly_data_df['clear'] = (hourly_data_df['icon'] == 'clear').astype(int)
 hourly_data_df['cloudy'] = (hourly_data_df['icon'] == 'cloudy').astype(int)
 hourly_data_df = hourly_data_df[['time', 'rain', 'clear', 'cloudy', 'apparentTemperature', 'precipIntensity', 'dewPoint', 'humidity', 'windSpeed', 'uvIndex', 'visibility']]
-hourly_data_df = hourly_data_df.rename(columns = {'time': 'Time'})
+hourly_data_df.columns = ['{}_h'.format(col) for col in hourly_data_df.columns]
+hourly_data_df = hourly_data_df.rename(columns = {'time_h': 'Time'})
 
 daily_data_df.to_csv('data/processed/london_daily_weather.csv', index = False)
 hourly_data_df.to_csv('data/processed/london_hourly_weather.csv', index = False)

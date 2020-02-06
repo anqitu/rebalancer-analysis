@@ -136,11 +136,13 @@ fig.savefig('images/avg_station_hourly_supply', dpi = 200, bbox_inches = 'tight'
 daily_data_df = pd.read_csv('data/processed/london_daily_weather.csv', parse_dates=['Time'])
 hourly_data_df = pd.read_csv('data/processed/london_hourly_weather.csv', parse_dates=['Time'])
 daily_data_df.shape
+hourly_data_df.shape
 
 
 combined = journeys_count_df.merge(hourly_data_df)
 combined.info()
-combined.corr()
+combined.corr()['Out'].apply(abs).sort_values()
+combined.corr()['In'].apply(abs).sort_values()
 
 
 journeys_count_df['day'] = journeys_count_df['Time'].dt.dayofyear
@@ -152,9 +154,17 @@ daily_count_df = daily_count_df.reset_index()
 daily_data_df = daily_data_df.reset_index()
 daily_combined = daily_count_df.merge(daily_data_df)
 
-daily_combined.corr()['Out']
-daily_combined.corr()['In']
+daily_combined.corr()['Out'].apply(abs).sort_values()
+daily_combined.corr()['In'].apply(abs).sort_values()
 
-all_columns = ['day', 'In', 'Out', 'Time', 'rain', 'clear', 'cloudy',
-       'apparentTemperatureHigh', 'apparentTemperatureLow', 'precipIntensity',
-       'dewPoint', 'humidity', 'windSpeed', 'uvIndex', 'visibility']
+daily_data_df.columns
+hourly_data_df.columns
+
+daily_columns = ['Time', 'rain_d', 'clear_d', 'cloudy_d', 'apparentTemperatureHigh_d',
+       'apparentTemperatureLow_d', 'precipIntensity_d', 'dewPoint_d',
+       'humidity_d', 'windSpeed_d', 'uvIndex_d', 'visibility_d']
+
+
+hourly_columns = ['Time', 'rain_d', 'clear_d', 'cloudy_d', 'apparentTemperature_d',
+       'precipIntensity_d', 'dewPoint_d', 'humidity_d', 'windSpeed_d',
+       'uvIndex_d', 'visibility_d']
