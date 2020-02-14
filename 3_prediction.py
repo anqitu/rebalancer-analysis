@@ -8,7 +8,7 @@ DENSE_LAYER_UNITS = 128
 # WEATHER = 'hourly'
 WEATHER = ''
 
-EPOCHS = 200
+EPOCHS = 2
 MODEL_EXPERIMENT_TIMES = 2
 WORKING_DIR = "."
 
@@ -459,7 +459,7 @@ for i in range(MODEL_EXPERIMENT_TIMES):
     for get_model, name in zip(get_models, model_names):
         print('Training {}'.format(name))
         model = get_model(train_X, train_y)
-        train_model(model, train_X, train_y.values, 1, verbose = 0)
+        train_model(model, train_X, train_y.values, EPOCHS, verbose = 0)
         scores_df.loc[scores_df.shape[0]] = ['Train', name, model.evaluate(train_X, train_y.values, verbose = 0) ** 0.5]
         scores_df.loc[scores_df.shape[0]] = ['Test', name, model.evaluate(test_X, test_y.values, verbose = 0) ** 0.5]
 
@@ -467,40 +467,40 @@ for i in range(MODEL_EXPERIMENT_TIMES):
         scores_df.to_csv(result_dir + '/model_performence.csv', index = False)
         print(scores_df)
 
-        # scores_df = pd.read_csv(result_dir + '/model_performence.csv')
-        fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False, hue_order = ['Train', 'Test'])
-        plt.title('Scores Distribution Across Models', size = 25, pad=20)
-        plt.xlabel('Models', fontsize = 20)
-        plt.ylabel('RMSE', fontsize = 20)
-        plt.xticks(fontsize = 15)
-        plt.yticks(fontsize = 15)
-        # plt.legend(fontsize = 20)
-        plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
-        fig.savefig(result_dir + '/scores_boxplot', dpi = 200, bbox_inches = 'tight')
+    # scores_df = pd.read_csv(result_dir + '/model_performence.csv')
+    fig = sns.catplot(data = scores_df, kind = 'box', x = 'model', y = 'RMSE', hue = 'data', height = 6, aspect = 1.4, legend=False, hue_order = ['Train', 'Test'])
+    plt.title('Scores Distribution Across Models', size = 25, pad=20)
+    plt.xlabel('Models', fontsize = 20)
+    plt.ylabel('RMSE', fontsize = 20)
+    plt.xticks(fontsize = 15)
+    plt.yticks(fontsize = 15)
+    # plt.legend(fontsize = 20)
+    plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
+    fig.savefig(result_dir + '/scores_boxplot', dpi = 200, bbox_inches = 'tight')
 
-        mean_scores_df = scores_df.groupby(['data', 'model'])['RMSE'].mean().reset_index()
-        mean_scores_df.loc[mean_scores_df.shape[0]] = ['Train', '7DMA', P7MA_train_RMSE]
-        mean_scores_df.loc[mean_scores_df.shape[0]] = ['Test', '7DMA', P7MA_test_RMSE]
-        mean_scores_df = mean_scores_df.sort_values(['RMSE'])
-        mean_scores_df.to_csv(result_dir + '/model_mean_RMSE.csv', index = False)
+    mean_scores_df = scores_df.groupby(['data', 'model'])['RMSE'].mean().reset_index()
+    mean_scores_df.loc[mean_scores_df.shape[0]] = ['Train', '7DMA', P7MA_train_RMSE]
+    mean_scores_df.loc[mean_scores_df.shape[0]] = ['Test', '7DMA', P7MA_test_RMSE]
+    mean_scores_df = mean_scores_df.sort_values(['RMSE'])
+    mean_scores_df.to_csv(result_dir + '/model_mean_RMSE.csv', index = False)
 
-        print(mean_scores_df)
+    print(mean_scores_df)
 
-        # mean_scores_df = pd.read_csv(result_dir + '/model_mean_RMSE.csv')
-        fig = sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
-            order=['7DMA', 'LSTM', 'GRU', 'Bi-LSTM'],
-            hue = 'data', hue_order=['Train', 'Test'], height = 6, aspect = 1.4, legend=False)
-        plt.title('Mean RMSEs Across Models', size = 25, pad=20)
-        plt.xlabel('Models', fontsize = 20)
-        plt.ylabel('Mean RMSE', fontsize = 20)
-        plt.xticks(fontsize = 15)
-        plt.yticks(fontsize = 15)
-        plt.legend(fontsize = 20)
-        # plt.legend(fontsize = 20, bbox_to_anchor=(1, 0.65))
-        for p in fig.ax.patches:
-            fig.ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.05),
-                            ha='center', va='bottom', color= 'black', fontsize=15)
-        fig.savefig(result_dir + '/scores_mean', dpi = 200, bbox_inches = 'tight')
+    # mean_scores_df = pd.read_csv(result_dir + '/model_mean_RMSE.csv')
+    fig = sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
+        order=['7DMA', 'LSTM', 'GRU', 'Bi-LSTM'],
+        hue = 'data', hue_order=['Train', 'Test'], height = 6, aspect = 1.4, legend=False)
+    plt.title('Mean RMSEs Across Models', size = 25, pad=20)
+    plt.xlabel('Models', fontsize = 20)
+    plt.ylabel('Mean RMSE', fontsize = 20)
+    plt.xticks(fontsize = 15)
+    plt.yticks(fontsize = 15)
+    plt.legend(fontsize = 20)
+    # plt.legend(fontsize = 20, bbox_to_anchor=(1, 0.65))
+    for p in fig.ax.patches:
+        fig.ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.05),
+                        ha='center', va='bottom', color= 'black', fontsize=15)
+    fig.savefig(result_dir + '/scores_mean', dpi = 200, bbox_inches = 'tight')
 
 
 # scores_df.describe()
@@ -542,37 +542,37 @@ for i in range(MODEL_EXPERIMENT_TIMES):
 # fig.savefig(WORKING_DIR + '/results/scores_mean', dpi = 200, bbox_inches = 'tight')
 
 """Build Single Model"""
-lstm = build_lstm(train_X, train_y)
-history = train_model(lstm, train_X, train_y.values)
-plot_training_history('LSTM', lstm, history, test_X, test_y.values)
-
-lstm_predict_df = make_prediction(lstm, test_y)
-postprocess_prediction('LSTM', lstm_predict_df)
-save_model(lstm, WORKING_DIR + '/results/LSTM.h5')
-
-plot_model(lstm, to_file=WORKING_DIR + '/images/LSTM.png', show_shapes=True, show_layer_names=False, dpi=200)
-
-
-gru = build_gru(train_X, train_y)
-history = train_model(gru, train_X, train_y.values)
-plot_training_history('GRU', gru, history, test_X, test_y.values)
-
-gru_predict_df = make_prediction(gru, test_y)
-postprocess_prediction('GRU', gru_predict_df)
-save_model(gru, WORKING_DIR + '/results/GRU.h5')
-
-plot_model(gru, to_file=WORKING_DIR + '/images/GRU.png', show_shapes=True, show_layer_names=False, dpi=200)
-
-
-bi_lstm = build_bi_lstm(train_X, train_y)
-history = train_model(bi_lstm, train_X, train_y.values)
-plot_training_history('Bi-LSTM', bi_lstm, history, test_X, test_y.values)
-
-bi_lstm_predict_df = make_prediction(bi_lstm, test_y)
-postprocess_prediction('Bi-LSTM', bi_lstm_predict_df)
-save_model(bi_lstm, WORKING_DIR + '/results/Bi-LSTM.h5'
-
-plot_model(bi_lstm, to_file=WORKING_DIR + '/images/Bi-LSTM.png', show_shapes=True, show_layer_names=False, dpi=200)
+# lstm = build_lstm(train_X, train_y)
+# history = train_model(lstm, train_X, train_y.values)
+# plot_training_history('LSTM', lstm, history, test_X, test_y.values)
+#
+# lstm_predict_df = make_prediction(lstm, test_y)
+# postprocess_prediction('LSTM', lstm_predict_df)
+# save_model(lstm, WORKING_DIR + '/results/LSTM.h5')
+#
+# plot_model(lstm, to_file=WORKING_DIR + '/images/LSTM.png', show_shapes=True, show_layer_names=False, dpi=200)
+#
+#
+# gru = build_gru(train_X, train_y)
+# history = train_model(gru, train_X, train_y.values)
+# plot_training_history('GRU', gru, history, test_X, test_y.values)
+#
+# gru_predict_df = make_prediction(gru, test_y)
+# postprocess_prediction('GRU', gru_predict_df)
+# save_model(gru, WORKING_DIR + '/results/GRU.h5')
+#
+# plot_model(gru, to_file=WORKING_DIR + '/images/GRU.png', show_shapes=True, show_layer_names=False, dpi=200)
+#
+#
+# bi_lstm = build_bi_lstm(train_X, train_y)
+# history = train_model(bi_lstm, train_X, train_y.values)
+# plot_training_history('Bi-LSTM', bi_lstm, history, test_X, test_y.values)
+#
+# bi_lstm_predict_df = make_prediction(bi_lstm, test_y)
+# postprocess_prediction('Bi-LSTM', bi_lstm_predict_df)
+# save_model(bi_lstm, WORKING_DIR + '/results/Bi-LSTM.h5'
+#
+# plot_model(bi_lstm, to_file=WORKING_DIR + '/images/Bi-LSTM.png', show_shapes=True, show_layer_names=False, dpi=200)
 
 """Make prediction given a time"""
 # journeys_predict_df = pd.read_csv(WORKING_DIR + '/data/predicted/london_journeys_predict_with_2h_interval_LSTM.csv', parse_dates=['Time'])
