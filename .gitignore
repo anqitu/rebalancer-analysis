@@ -9,3 +9,7 @@ data/raw/journeys-tfl/2018/
 data/raw/journeys-tfl/2019/
 
 data/raw/
+
+results/archive
+
+*.h5
