@@ -13,3 +13,5 @@ data/raw/
 results/archive
 
 *.h5
+
+data/predicted/
