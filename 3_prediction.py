@@ -370,15 +370,19 @@ def train_model(model, train_X, train_y, epochs=200, verbose = 2):
                     callbacks=[earlystopping])
     return history
 
-def plot_training_history(model_name, model, history, test_X, test_y):
-    rmse = model.evaluate(test_X, test_y, verbose = 0) ** 0.5
-    print('RMSE (float) = {:.3f}'.format(rmse))
+def plot_training_history(model_name, model, history, train_X, train_y, test_X, test_y):
+    train_rmse = model.evaluate(train_X, train_y, verbose = 0) ** 0.5
+    print('Train RMSE (float) = {:.3f}'.format(train_rmse))
+
+    test_rmse = model.evaluate(test_X, test_y, verbose = 0) ** 0.5
+    print('Test RMSE (float) = {:.3f}'.format(test_rmse))
 
     title = '{} Training History'.format(model_name)
     plt.figure(figsize=(12, 8))
     plt.plot(history.history['loss'], label='train')
     plt.plot(history.history['val_loss'], label='val')
-    plt.plot([], [], ' ', label='Val RMSE = {:.3f}'.format(rmse))
+    plt.plot([], [], ' ', label='Train RMSE = {:.3f}'.format(train_rmse))
+    plt.plot([], [], ' ', label='Test RMSE = {:.3f}'.format(test_rmse))
     plt.legend(fontsize = 20)
     plt.title(title, size = 25, pad=20)
     plt.xlabel('No. Epochs', fontsize = 20)
@@ -566,7 +570,7 @@ fig.savefig(WORKING_DIR + '/results/scores_mean', dpi = 200, bbox_inches = 'tigh
 """Build Single Model"""
 lstm = build_lstm(train_X, train_y)
 history = train_model(lstm, train_X, train_y.values)
-plot_training_history('LSTM', lstm, history, test_X, test_y.values)
+plot_training_history('LSTM', lstm, history, train_X, train_y.values, test_X, test_y.values)
 
 lstm_predict_df = make_prediction(lstm, test_y)
 postprocess_prediction('LSTM', lstm_predict_df)
@@ -577,7 +581,7 @@ plot_model(lstm, to_file=WORKING_DIR + '/images/LSTM.png', show_shapes=True, sho
 
 gru = build_gru(train_X, train_y)
 history = train_model(gru, train_X, train_y.values)
-plot_training_history('GRU', gru, history, test_X, test_y.values)
+plot_training_history('GRU', gru, history, train_X, train_y.values, test_X, test_y.values)
 
 gru_predict_df = make_prediction(gru, test_y)
 postprocess_prediction('GRU', gru_predict_df)
@@ -588,7 +592,7 @@ plot_model(gru, to_file=WORKING_DIR + '/images/GRU.png', show_shapes=True, show_
 
 bi_lstm = build_bi_lstm(train_X, train_y)
 history = train_model(bi_lstm, train_X, train_y.values)
-plot_training_history('Bi-LSTM', bi_lstm, history, test_X, test_y.values)
+plot_training_history('Bi-LSTM', bi_lstm, history, train_X, train_y.values, test_X, test_y.values)
 
 bi_lstm_predict_df = make_prediction(bi_lstm, test_y)
 postprocess_prediction('Bi-LSTM', bi_lstm_predict_df)
