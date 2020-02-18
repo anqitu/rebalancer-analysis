@@ -254,8 +254,6 @@ def get_counts_df(journeys_count_df):
     print('Processing Counts Data')
     counts_df = []
     features = ['In', 'Out']
-    # features = ['In']
-    # features = ['Out']
     for feature in features:
         feature_values_df = journeys_count_df.pivot(index='Time', columns='Station ID', values=feature)
         feature_values_df.columns = ['{}_{}'.format(feature, col) for col in feature_values_df.columns]
@@ -331,12 +329,10 @@ def reshape_inputs(x, timesteps):
     return x
 
 def create_inputs(historic_df, timesteps = 1, lags = 1):
-
     inputs = historic_df.iloc[:, :historic_df.shape[1]*timesteps//(timesteps+lags)]
     inputs = scale_x(inputs)
     inputs = reshape_inputs(inputs, timesteps)
     return inputs
-
 
 def create_outputs(historic_df, timesteps = 1, lags = 1):
     outputs = historic_df.iloc[:, -historic_df.shape[1]*lags//(timesteps+lags):]
@@ -539,8 +535,8 @@ plt.xlabel('Models', fontsize = 20)
 plt.ylabel('RMSE', fontsize = 20)
 plt.xticks(fontsize = 15)
 plt.yticks(fontsize = 15)
-# plt.legend(fontsize = 20)
-plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
+plt.legend(fontsize = 20)
+# plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
 fig.savefig(WORKING_DIR + '/results/scores_boxplot', dpi = 200, bbox_inches = 'tight')
 
 mean_scores_df = scores_df.groupby(['data', 'model'])['RMSE'].mean().reset_index()
@@ -609,6 +605,7 @@ records_cur = {row['Station ID']: {'in': int(row['In']), 'out': int(row['Out'])}
 records_next = {row['Station ID']: {'in': int(row['In']), 'out': int(row['Out'])} for index, row in records[records['Lag'] == 1].iterrows()}
 
 # predict_df = pd.read_csv(WORKING_DIR + '/data/processed/london_journeys_count_with_2h_interval.csv', parse_dates=['Time'])
+# predict_df = predict_df[predict_df['Time']>=TEST_PREDICT_START_TIME]
 # predict_df2 = predict_df.copy()
 # predict_df['Lag'] = 0
 #
