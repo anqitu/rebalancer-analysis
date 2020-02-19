@@ -529,19 +529,22 @@ scores_df = scores_df.sort_values(['model', 'data'])
 scores_df.to_csv(WORKING_DIR + '/results/model_performence.csv', index = False)
 
 scores_df = pd.read_csv(WORKING_DIR + '/results/model_performence.csv')
-fig = sns.catplot(data = scores_df, x = 'model', y = 'RMSE', kind = 'box',
-                  height = 6, aspect = 1.4, legend=False,
+
+fig, ax = plt.subplots(figsize=(9.32, 8))
+sns.catplot(data = scores_df, x = 'model', y = 'RMSE', kind = 'box',
+                  # height = 8, aspect = 1.2,
+                  ax=ax,
+                  legend=False,
                   hue = 'data',
                   hue_order = ['Train', 'Test'],
                   order=['LSTM', 'GRU', 'Bi-LSTM'])
-plt.title('Scores Distribution Across Models', size = 25, pad=20)
-plt.xlabel('Models', fontsize = 20)
-plt.ylabel('RMSE', fontsize = 20)
-plt.xticks(fontsize = 15)
-plt.yticks(fontsize = 15)
-plt.legend(fontsize = 20)
+# plt.title('Scores Distribution Across Models', size = 25, pad=20)
+ax.set_xlabel('Models', fontsize = 20)
+ax.set_ylabel('RMSE', fontsize = 20)
+ax.tick_params(labelsize = 15)
+ax.legend(fontsize = 20)
 # plt.legend(fontsize = 20, bbox_to_anchor=(1.3, 0.65))
-fig.savefig(WORKING_DIR + '/results/scores_boxplot', dpi = 200, bbox_inches = 'tight')
+fig.savefig(WORKING_DIR + '/results/ScoreDistribution.eps', format='eps', dpi=1000, bbox_inches = 'tight')
 
 mean_scores_df = scores_df.groupby(['data', 'model'])['RMSE'].mean().reset_index()
 mean_scores_df.loc[mean_scores_df.shape[0]] = ['Train', '7DMA', P7MA_train_RMSE]
@@ -551,21 +554,24 @@ mean_scores_df.to_csv(WORKING_DIR + '/results/model_mean_RMSE.csv', index = Fals
 mean_scores_df
 
 mean_scores_df = pd.read_csv(WORKING_DIR + '/results/model_mean_RMSE.csv')
-fig = sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
-                  height = 6, aspect = 1.4, legend=False,
+fig, ax = plt.subplots(figsize=(9.47, 8))
+ax.grid(False)
+sns.catplot(data = mean_scores_df, x = 'model', y = 'RMSE',kind = 'bar',
+                  # height = 8, aspect = 1.2,
+                  ax=ax,
+                  legend=False,
                   order=['7DMA', 'LSTM', 'GRU', 'Bi-LSTM'],
                   hue = 'data', hue_order=['Train', 'Test'])
-plt.title('Mean RMSEs Across Models', size = 25, pad=20)
-plt.xlabel('Models', fontsize = 20)
-plt.ylabel('Mean RMSE', fontsize = 20)
-plt.xticks(fontsize = 15)
-plt.yticks(fontsize = 15)
-plt.legend(fontsize = 20)
+# plt.title('Mean RMSEs Across Models', size = 25, pad=20)
+ax.set_xlabel('Models', fontsize = 20)
+ax.set_ylabel('Mean RMSE', fontsize = 20)
+ax.tick_params(labelsize = 15)
+ax.legend(fontsize = 20)
 # plt.legend(fontsize = 20, bbox_to_anchor=(1, 0.65))
-for p in fig.ax.patches:
-    fig.ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.05),
+for p in ax.patches:
+    ax.annotate('{:.3f}'.format(p.get_height()), (p.get_x()+0.2, p.get_height()+0.03),
                     ha='center', va='bottom', color= 'black', fontsize=15)
-fig.savefig(WORKING_DIR + '/results/scores_mean', dpi = 200, bbox_inches = 'tight')
+fig.savefig(WORKING_DIR + '/results/ScoreMean.eps', format='eps', dpi=1000, bbox_inches = 'tight')
 
 """Build Single Model"""
 lstm = build_lstm(train_X, train_y)
