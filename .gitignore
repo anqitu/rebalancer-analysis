@@ -15,3 +15,5 @@ results/archive
 *.h5
 
 data/predicted/
+
+data.zip
